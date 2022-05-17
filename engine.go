@@ -5,12 +5,13 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io/ioutil"
-	"mergemock/api"
-	"mergemock/rpc"
-	"mergemock/types"
 	"net/http"
 	"sync/atomic"
 	"time"
+
+	"mergemock/api"
+	"mergemock/rpc"
+	"mergemock/types"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core"
@@ -238,7 +239,11 @@ func (e *EngineBackend) ForkchoiceUpdatedV1(ctx context.Context, heads *types.Fo
 	binary.BigEndian.PutUint64(id[:], idU64)
 
 	plog := e.log.WithField("payload_id", id)
-	plog.WithField("attributes", attributes).Info("Preparing new payload")
+	plog.WithFields(logrus.Fields{
+		"time_stamp":              attributes.Timestamp,
+		"prev_randao":             attributes.PrevRandao.String(),
+		"suggested_fee_recipient": attributes.SuggestedFeeRecipient.String(),
+	}).Info("Preparing new payload")
 
 	gasLimit := e.mockChain.gspec.GasLimit
 	txsCreator := TransactionsCreator{nil, func(config *params.ChainConfig, bc core.ChainContext,
